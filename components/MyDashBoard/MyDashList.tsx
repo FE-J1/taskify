@@ -1,54 +1,57 @@
-import { useGetDashboardList } from "@/hooks/dashboard/useGetDashboardList";
-import { boardCardBtn, boardCardBtnBox } from "./MyDashStyle";
-import { useEffect, useState } from "react";
-import { useRouter } from "next/router";
-import Cookies from "js-cookie";
+import { useState, useEffect } from "react";
+import { getDashboards } from "@/utils/api/dashboardsApi";
+import { DashboardResponse } from "@/types/dashboards";
 import Link from "next/link";
 import Image from "next/image";
 import CreateDashBoard from "./CreateDashBoard";
-import useModal from "@/hooks/useModal";
+import useModal from "@/hooks/modal/useModal";
+import { boardCardBtn, boardCardBtnBox } from "./MyDashStyle";
+import { parse } from "cookie";
 
-const MyDashList: React.FC = () => {
-  const router = useRouter();
+interface MyDashListProps {
+  initialDashboards: DashboardResponse;
+}
+
+const MyDashList: React.FC<MyDashListProps> = ({ initialDashboards }) => {
   const [currentPage, setCurrentPage] = useState(1);
-  const { data, loading, error } = useGetDashboardList("pagination", 0, 1, 5);
+  const [dashboards, setDashboards] = useState(initialDashboards);
   const { isOpen, openModal, closeModal } = useModal();
 
-  useEffect(() => {
-    const accessToken = Cookies.get("accessToken");
-    if (!accessToken) {
-      router.push("/404"); // accessToken이 없으면 404 페이지로 이동
-    }
-  }, [router]);
-
-  const totalCount = data?.totalCount || 0;
+  const totalCount = dashboards?.totalCount || 0;
   const totalPages = Math.ceil(totalCount / 5);
-  const dashboards = data?.dashboards || [];
 
   useEffect(() => {
-    if (data && currentPage > totalPages) {
-      setCurrentPage(totalPages); // 현재 페이지가 총 페이지 수를 초과할 경우 조정
+    const fetchDashboards = async () => {
+      try {
+        const cookies = parse(document.cookie);
+        const accessToken = cookies.accessToken;
+        const data = await getDashboards(currentPage, 5, accessToken);
+        setDashboards(data);
+      } catch (error) {
+        console.error("Error fetching dashboards:", error);
+      }
+    };
+
+    if (currentPage > 1) {
+      fetchDashboards();
     }
-  }, [data, currentPage, totalPages]);
+  }, [currentPage]);
 
   const handleNextPage = () => {
-    setCurrentPage((prev) => prev + 1);
+    if (currentPage < totalPages) {
+      setCurrentPage((prev) => prev + 1);
+    }
   };
 
   const handlePreviousPage = () => {
-    setCurrentPage((prev) => Math.max(prev - 1, 1)); // 1페이지 이하로는 내리지 않음
+    if (currentPage > 1) {
+      setCurrentPage((prev) => prev - 1);
+    }
   };
 
-  // 새로운 대쉬보드 모달
   const handleNewDashBoard = () => {
     openModal();
   };
-  if (loading) {
-    return <div>Loading...</div>;
-  }
-  if (error) {
-    return <div>Error: {error}</div>;
-  }
 
   return (
     <div>
@@ -59,27 +62,27 @@ const MyDashList: React.FC = () => {
             className={`${boardCardBtnBox}`}
             onClick={handleNewDashBoard}
           >
-            <p className="inline-block pr-[34px] bg-[url('/images/icons/icon_add_card.svg')] bg-no-repeat bg-right">
-              새로운 대시보드
-            </p>
+            새로운 대시보드 <br /> 추가하기
+            <Image
+              src="/images/icons/icon_add_dashboard.svg"
+              width={16}
+              height={16}
+              alt="대시보드 추가"
+            />
           </button>
-          {isOpen && <CreateDashBoard isOpen={isOpen} onClose={closeModal} />}
         </div>
-        {data?.dashboards.map((dashboard) => (
+
+        {dashboards?.dashboards?.map((dashboard) => (
           <div key={dashboard.id} className={`${boardCardBtn}`}>
             <Link
               href={`/dashboards/${dashboard.id}`}
-              className={`flex items-center gap-3 ${boardCardBtnBox}`}
-              style={{ backgroundPosition: "right 15px center" }}
+              className={`${boardCardBtnBox}`}
+              prefetch={false} // 프리페치 비활성화로 getServerSideProps가 항상 실행되도록 함
             >
-              <span
-                className="block w-2 h-2 rounded-full"
-                style={{ backgroundColor: dashboard.color }}
-              ></span>
-              <p className="truncate">{dashboard.title}</p>
+              {dashboard.title}
               {dashboard.createdByMe && (
                 <Image
-                  src={"/images/icons/icon_crown.svg"}
+                  src="/images/icons/icon_crown.svg"
                   width={20}
                   height={18}
                   className="md:h-[14px] md:w-[18px]"
@@ -87,7 +90,7 @@ const MyDashList: React.FC = () => {
                 />
               )}
               <Image
-                src={"/images/icons/icon_arrow_right.svg"}
+                src="/images/icons/icon_arrow_right.svg"
                 width={18}
                 height={18}
                 className="ml-auto"
@@ -97,8 +100,9 @@ const MyDashList: React.FC = () => {
           </div>
         ))}
       </div>
-      {dashboards.length > 0 && (
-        <div className="flex items-center justify-end gap-5 mt-4 ">
+
+      {dashboards?.dashboards?.length > 0 && (
+        <div className="flex items-center justify-end gap-5 mt-4">
           <div>
             <span className="text-sm text-black300">
               {currentPage} 페이지 중 {totalPages}
@@ -111,11 +115,11 @@ const MyDashList: React.FC = () => {
               className="relative w-9 h-9 md:w-10 md:h-10"
             >
               <Image
-                src={"/images/icons/pagination_left.svg"}
+                src="/images/icons/pagination_left.svg"
                 fill
                 alt="이전"
-                style={{ objectFit: "cover" }} // CSS 스타일로 objectFit 설정
-                sizes="(max-width: 768px) 50px, (max-width: 1200px) 75px, 100px" // 뷰포트에 따른 이미지 크기 설정
+                style={{ objectFit: "cover" }}
+                sizes="(max-width: 768px) 50px, (max-width: 1200px) 75px, 100px"
               />
             </button>
             <button
@@ -124,16 +128,17 @@ const MyDashList: React.FC = () => {
               className="relative w-9 h-9 md:w-10 md:h-10"
             >
               <Image
-                src={"/images/icons/pagination_right.svg"}
+                src="/images/icons/pagination_right.svg"
                 fill
                 alt="다음"
-                style={{ objectFit: "cover" }} // CSS 스타일로 objectFit 설정
-                sizes="(max-width: 768px) 50px, (max-width: 1200px) 75px, 100px" // 뷰포트에 따른 이미지 크기 설정
+                style={{ objectFit: "cover" }}
+                sizes="(max-width: 768px) 50px, (max-width: 1200px) 75px, 100px"
               />
             </button>
           </div>
         </div>
       )}
+      {isOpen && <CreateDashBoard isOpen={isOpen} onClose={closeModal} />}
     </div>
   );
 };

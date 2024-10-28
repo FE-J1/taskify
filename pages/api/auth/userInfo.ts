@@ -14,10 +14,10 @@ export default async function handler(
   }
 
   try {
-    const userInfo = await getUserInfo();
+    const userInfo = await getUserInfo(accessToken);
     res.status(200).json(userInfo);
   } catch (error) {
-    console.log("사용자 정보를 가져오는데 실패했습니다:", error);
+    console.error("사용자 정보를 가져오는데 실패했습니다:", error);
     res.status(401).json({ message: "사용자 정보를 가져오는데 실패했습니다." });
   }
 }

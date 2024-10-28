@@ -1,29 +1,29 @@
-import Axios from "axios";
-import Cookies from "js-cookie";
+import axios from "axios";
+import { parse } from "cookie";
 
-const axiosInstance = Axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000",
-  timeout: 5000, // 5초
-  withCredentials: false,
+const axiosInstance = axios.create({
+  baseURL: process.env.NEXT_PUBLIC_API_URL,
   headers: {
     "Content-Type": "application/json",
-    Accept: "application/json",
   },
 });
 
-// accessToken을 Authorization 헤더에 자동으로 포함하는 인터셉터
-axiosInstance.interceptors.request.use(
-  (config) => {
-    const token = Cookies.get("accessToken"); // 또는 다른 방식으로 토큰을 가져옵니다
-    console.log("현재 토큰:", token); // 토큰 로그 추가
-    if (token) {
-      config.headers["Authorization"] = `Bearer ${token}`;
+axiosInstance.interceptors.request.use((config) => {
+  // 서버사이드
+  if (typeof window === "undefined" && config.headers) {
+    const cookies = parse(config.headers.cookie || "");
+    if (cookies.accessToken) {
+      config.headers.Authorization = `Bearer ${cookies.accessToken}`;
     }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
   }
-);
+  // 클라이언트사이드
+  else if (typeof window !== "undefined") {
+    const cookies = parse(document.cookie);
+    if (cookies.accessToken) {
+      config.headers.Authorization = `Bearer ${cookies.accessToken}`;
+    }
+  }
+  return config;
+});
 
 export default axiosInstance;

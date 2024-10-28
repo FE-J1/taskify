@@ -40,7 +40,7 @@ const DashboardDetail: React.FC<DashboardDetailProps> = ({ initialUser }) => {
   } = useModal();
 
   // 인증 관련 상태와 메서드 불러오기
-  const { user, setUser, checkAuth } = useAuthStore();
+  const { user, setUser } = useAuthStore();
 
   // 컴포넌트가 마운트될 때 initialUser가 있으면 유저 정보 설정, 없으면 인증 체크
   useEffect(() => {
@@ -49,10 +49,8 @@ const DashboardDetail: React.FC<DashboardDetailProps> = ({ initialUser }) => {
         ...initialUser,
         profileImageUrl: initialUser.profileImageUrl || "",
       });
-    } else {
-      checkAuth();
     }
-  }, [initialUser, setUser, checkAuth]);
+  }, [initialUser, setUser]);
 
   // 칼럼 데이터를 가져오는 함수 - 비동기로 getColumns API 호출
   const fetchColumns = useCallback(async () => {
@@ -149,27 +147,34 @@ const DashboardDetail: React.FC<DashboardDetailProps> = ({ initialUser }) => {
 };
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-  const cookies = parse(context.req.headers.cookie || ""); // 쿠키 파싱
-  const accessToken = cookies.accessToken; // accessToken 추출
-
-  if (!accessToken) {
-    // accessToken이 없으면 로그인 페이지로 리다이렉트
-    return {
-      redirect: {
-        destination: "/login",
-        permanent: false,
-      },
-    };
-  }
-
   try {
-    const user = await getUserInfo(accessToken); // accessToken으로 유저 정보 가져오기
+    const cookies = parse(context.req.headers.cookie || "");
+    const accessToken = cookies.accessToken;
+
+    if (!accessToken) {
+      return {
+        redirect: {
+          destination: "/login",
+          permanent: false,
+        },
+      };
+    }
+
+    // headers 객체에 Authorization 헤더 추가
+    const headers = {
+      cookie: context.req.headers.cookie,
+      Authorization: `Bearer ${accessToken}`,
+    };
+
+    const user = await getUserInfo(headers);
+
     return {
-      props: { initialUser: user }, // 유저 정보를 initialUser로 전달
+      props: {
+        initialUser: user,
+      },
     };
   } catch (error) {
     console.error("Error fetching user info:", error);
-    // 에러 발생 시 로그인 페이지로 리다이렉트
     return {
       redirect: {
         destination: "/login",

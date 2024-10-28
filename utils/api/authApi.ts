@@ -40,7 +40,7 @@ export const createUser = async (formData: formData) => {
 };
 export const getLogin = async (loginData: loginData) => {
   try {
-    const response = await axiosInstance.post("/auth/login", loginData);
+    const response = await axiosInstance.post("api/auth/login", loginData);
     return response.data;
   } catch (error) {
     if (error instanceof AxiosError) {
@@ -52,11 +52,9 @@ export const getLogin = async (loginData: loginData) => {
   }
 };
 
-export const getUserInfo = async (token?: string) => {
+export const getUserInfo = async (headers?: any) => {
   try {
-    const response = await axiosInstance.get("/users/me", {
-      headers: token ? { Authorization: `Bearer ${token}` } : undefined,
-    });
+    const response = await axiosInstance.get("/users/me", { headers });
     return response.data;
   } catch (error) {
     console.error("Failed to fetch user info:", error);

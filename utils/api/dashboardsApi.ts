@@ -9,14 +9,19 @@ import { AxiosError } from "axios";
 import { onError } from "./error";
 
 // 대시보드 목록 가져오기
-export const getDashboards = async (page: number, size: number) => {
+export const getDashboards = async (
+  page: number,
+  size: number,
+  headers?: any
+) => {
   try {
-    const response = await axiosInstance.get<DashboardResponse>(`/dashboards`, {
+    const response = await axiosInstance.get("/dashboards", {
       params: {
         navigationMethod: "pagination",
         page,
         size,
       },
+      headers,
     });
     return response.data;
   } catch (error) {

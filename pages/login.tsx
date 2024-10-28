@@ -12,6 +12,7 @@ import { useRouter } from "next/router";
 import { useAuthStore } from "@/store/authStore";
 import { getLogin } from "@/utils/api/authApi";
 import { setAccessToken } from "@/utils/api/cookie";
+import axiosInstance from "@/utils/api/axiosInstanceApi";
 
 const Login = () => {
   const router = useRouter();
@@ -61,28 +62,32 @@ const Login = () => {
     };
 
     try {
-      const response = await getLogin(formData);
-      const { user, accessToken } = response;
-      setAccessToken(accessToken);
-      login(user); // 추가: 로그인 성공 시 useAuthStore의 login 함수 호출
-      router.push("/mydashboard");
-      return;
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+        credentials: "include",
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.user) {
+        login(data.user);
+        // 로그인 성공 후 쿠키가 제대로 설정되도록 잠시 대기
+        await new Promise((resolve) => setTimeout(resolve, 100));
+        await router.push("/mydashboard");
+      } else {
+        throw new Error(data.message || "로그인에 실패했습니다.");
+      }
     } catch (error) {
       console.error("로그인 중 오류 발생:", error);
-      if (error instanceof AxiosError) {
-        const message = error.message;
-        const status = error.status;
-
-        if (status === 400) {
-          alert(message);
-        } else if (status === 404) {
-          alert(message);
-        } else {
-          console.error(message);
-        }
-      } else {
-        console.error("예기치 못한 에러가 발생했습니다.", error);
-      }
+      alert(
+        error instanceof Error
+          ? error.message
+          : "로그인 중 오류가 발생했습니다."
+      );
     }
   };
 
