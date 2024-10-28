@@ -64,7 +64,7 @@ const MyDashList: React.FC<MyDashListProps> = ({ initialDashboards }) => {
           >
             새로운 대시보드 <br /> 추가하기
             <Image
-              src="/images/icons/icon_add_dashboard.svg"
+              src="/images/icons/icon_add_card.svg"
               width={16}
               height={16}
               alt="대시보드 추가"
