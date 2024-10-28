@@ -25,6 +25,7 @@ const MyDashList: React.FC<MyDashListProps> = ({ initialDashboards }) => {
       try {
         const cookies = parse(document.cookie);
         const accessToken = cookies.accessToken;
+        // Todo:
         const data = await getDashboards(currentPage, 5, accessToken);
         setDashboards(data);
       } catch (error) {
