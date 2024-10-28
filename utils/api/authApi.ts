@@ -1,8 +1,8 @@
 import axiosInstance from "./axiosInstanceApi";
 import axios, { AxiosError } from "axios";
 import { onError } from "./error";
-import { ImageCreateResponse } from "@/types/columns";
-import { ProfileImageParams } from "@/types/my";
+
+import { ProfileImageParams, ProfileImageResponse } from "@/types/my";
 
 interface formData {
   email: string;
@@ -91,7 +91,7 @@ export const UpdateUserInfo = async ({
 
 export const createCardImage = async ({
   image,
-}: ProfileImageParams): Promise<ImageCreateResponse> => {
+}: ProfileImageParams): Promise<ProfileImageResponse> => {
   const formData = new FormData();
   if (!image) throw new Error("이미지가 없습니다.");
   formData.append("image", image);
