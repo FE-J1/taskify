@@ -77,7 +77,7 @@ const Login = () => {
         login(data.user);
         // 로그인 성공 후 쿠키가 제대로 설정되도록 잠시 대기
         await new Promise((resolve) => setTimeout(resolve, 100));
-        await router.push("/mydashboard");
+        router.push("/mydashboard");
       } else {
         throw new Error(data.message || "로그인에 실패했습니다.");
       }

@@ -2,6 +2,23 @@ import { NextApiRequest, NextApiResponse } from "next";
 import { serialize } from "cookie";
 import axiosInstance from "@/utils/api/axiosInstanceApi";
 
+const getTokenFromCookie = () => {
+  if (typeof window === "undefined") return null;
+  return document.cookie
+    .split("; ")
+    .find((row) => row.startsWith("accessToken="))
+    ?.split("=")[1];
+};
+
+// 인터셉터 설정
+axiosInstance.interceptors.request.use((config) => {
+  const token = getTokenFromCookie();
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
@@ -9,6 +26,8 @@ export default async function handler(
   if (req.method === "POST") {
     try {
       const { email, password } = req.body;
+
+      // 로그인 요청
       const response = await axiosInstance.post("/auth/login", {
         email,
         password,
@@ -16,7 +35,7 @@ export default async function handler(
 
       const { user, accessToken } = response.data;
 
-      // Set-Cookie 헤더를 통해 accessToken 쿠키를 설정
+      // 토큰을 쿠키에 설정
       res.setHeader(
         "Set-Cookie",
         serialize("accessToken", accessToken, {
@@ -30,7 +49,11 @@ export default async function handler(
         })
       );
 
-      // 사용자 정보와 accessToken 전송
+      // 이후의 요청에서 사용할 수 있도록 axiosInstance의 기본 헤더 설정
+      axiosInstance.defaults.headers.common[
+        "Authorization"
+      ] = `Bearer ${accessToken}`;
+
       res.status(200).json({
         user,
         accessToken,
