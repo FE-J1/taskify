@@ -7,7 +7,7 @@
 
 # 🔗 배포 사이트
 
-https://fandom-k-9-4.netlify.app/
+https://taskify-9-1.vercel.app/
 
 <br/>
 
