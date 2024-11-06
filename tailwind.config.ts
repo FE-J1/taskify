@@ -30,7 +30,7 @@ const config: Config = {
         violet200: "var(--violet200)",
       },
       screens: {
-        sm: "375px",
+        sm: "343px",
         md: "768px",
         lg: "1200px",
       },
