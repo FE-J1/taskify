@@ -27,7 +27,7 @@ const ActionButton: React.FC<ActionButtonProps> = ({
               alt="관리"
             />
           </span>
-          관리
+          <span>관리</span>
         </button>
       </li>
       <li>
@@ -44,7 +44,8 @@ const ActionButton: React.FC<ActionButtonProps> = ({
               alt="초대하기"
             />
           </span>
-          초대하기
+          <span className="block md:hidden">초대</span>
+          <span className="hidden md:block">초대하기</span>
         </button>
       </li>
       <li>

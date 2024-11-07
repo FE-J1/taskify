@@ -1,5 +1,6 @@
 import {
   ColoumnsParams,
+  Columns,
   ColumnsCreateParams,
   ColumnsResponse,
   ColumnsUpdateParams,
@@ -29,9 +30,9 @@ export const getColumns = async ({
 export const createColumn = async ({
   title,
   dashboardId,
-}: ColumnsCreateParams): Promise<ColumnsResponse> => {
+}: ColumnsCreateParams): Promise<Columns> => {
   try {
-    const response = await axiosInstance.post<ColumnsResponse>(`/columns`, {
+    const response = await axiosInstance.post<Columns>(`/columns`, {
       title, // 생성할 컬럼의 제목
       dashboardId, // 대시보드 ID
     });
