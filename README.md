@@ -31,9 +31,9 @@ https://taskify-9-1.vercel.app/
 
 # ⚒️ 기술 스택
 
-|<img src="https://github.com/user-attachments/assets/215587a1-fb56-4dfd-87c4-5bb85517017a" width='100'/>|<img src="https://github.com/user-attachments/assets/ddf2f58e-6d06-4de1-8cda-d7d0660054f4" width='100'/>|<img src="https://github.com/user-attachments/assets/68263649-2ef8-46ae-82b5-51c9f617b7e6" width="100" /> |
+|<img src="https://github.com/user-attachments/assets/c21636bf-27b3-4432-8305-b8d6ef433dad" width='100'/>|<img src="https://github.com/user-attachments/assets/ddf2f58e-6d06-4de1-8cda-d7d0660054f4" width='100'/>|<img src="https://github.com/user-attachments/assets/68263649-2ef8-46ae-82b5-51c9f617b7e6" width="100" /> |
 |:---:|:---:|:---:|
-| JavaScript | HTML | CSS |
+| TypeScript | HTML | CSS |
 
 <br/>
 
