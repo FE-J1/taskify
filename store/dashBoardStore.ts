@@ -82,11 +82,10 @@ export const useDashBoardStore = create<DashboardStore>((set, get) => ({
   addColumn: async (title: string, dashboardId: number) => {
     try {
       const params: ColumnsCreateParams = { title, dashboardId };
-      const newColumn = await createColumn(params);
+      const newColumn: Columns = await createColumn(params);
       if (newColumn) {
-        // 새로운 컬럼을 기존 상태에 추가합니다.
         set((state) => ({
-          columns: [...state.columns, ...newColumn.data],
+          columns: [...state.columns, newColumn],
         }));
       }
       get().fetchColumns(dashboardId);
